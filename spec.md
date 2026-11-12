@@ -218,7 +218,7 @@ Vì những việc này cấm với AI, đường đi của khách luôn là `ch
 | Thành viên | Chọn mức | Lý do của người đó |
 |---|---|---|
 | [Lê Hải Bắc] | **Cần khách duyệt** | Hoàn vé là quyền của khách nên không cấm; nhưng gửi rồi không huỷ được nên không cho tự làm. Thêm điều kiện: nút gửi chỉ bật khi đã chọn rõ người và có đủ nơi nhận tiền / thời gian hoàn (KB3), và thêm một bước xác nhận gửi phòng khách muốn đổi ý — bước này đặt nút "Đổi chuyến thay vì hoàn" ngang hàng với nút gửi để không bị bấm theo phản xạ. |
-| [Họ tên B] | [ ] | [ ] |
+| Đỗ Nhật Anh | **Cấm** | Ban đầu mình chọn cấm gửi hoàn vì tool không thể đảo lại, trong khi dữ liệu hiện có thiếu nơi nhận tiền và thời gian hoàn; ở KB3, câu “huỷ hết đi” còn chưa rõ khách muốn hoàn cho ai. Nếu gửi nhầm, khách mất vé và quyền đổi miễn phí, còn KB5 cho thấy cũng không thể lấy lại vé bằng một thao tác khác. Mình cân nhắc cái giá ngược lại: cấm hoàn tước quyền chọn hoàn tiền của khách và buộc họ tự đi qua luồng cũ. Vì vậy nhóm chốt không cấm hoàn hẳn, mà chỉ mở nút gửi sau khi đủ dữ liệu và khách xác nhận hai lần. |
 | [Họ tên C] | [ ] | [ ] |
 | [Họ tên D] | [ ] | [ ] |
 
