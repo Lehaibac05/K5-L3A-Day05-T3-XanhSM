@@ -1,4 +1,4 @@
-# Bài nộp LAB5 — [Track-03] · Nhóm [XanhSM]
+# Bài nộp LAB5 — Track-03 · Nhóm XanhSM
 [Danh sách thành viên và việc mỗi người làm — copy bảng từ README]
 
 ## §1. Lát cắt & phạm vi
