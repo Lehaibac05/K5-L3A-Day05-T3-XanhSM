@@ -219,7 +219,7 @@ Vì những việc này cấm với AI, đường đi của khách luôn là `ch
 |---|---|---|
 | [Lê Hải Bắc] | **Cần khách duyệt** | Hoàn vé là quyền của khách nên không cấm; nhưng gửi rồi không huỷ được nên không cho tự làm. Thêm điều kiện: nút gửi chỉ bật khi đã chọn rõ người và có đủ nơi nhận tiền / thời gian hoàn (KB3), và thêm một bước xác nhận gửi phòng khách muốn đổi ý — bước này đặt nút "Đổi chuyến thay vì hoàn" ngang hàng với nút gửi để không bị bấm theo phản xạ. |
 | [Họ tên B] | [ ] | [ ] |
-| [Họ tên C] | [ ] | [ ] |
+| [Đào Trường Vũ] | [**Cần khách duyệt** ] | [Hoàn toàn bộ là quyền khách; cấm thì trợ lý vô dụng đúng lúc khách cần, khách lại phải đi luồng cũ qua nhiều màn hình. Một thẻ tóm tắt kèm cảnh báo đỏ là đủ, thêm bước nữa thì rườm rà. ] |
 | [Họ tên D] | [ ] | [ ] |
 
 **Cái giá của mỗi phía:**
