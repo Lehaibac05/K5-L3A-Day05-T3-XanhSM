@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototype T3 · Trợ lý đổi chuyến khi chuyến bay bị huỷ</title>
+<style>
+  :root {
+    --bg: #eef1f5; --card: #fff; --line: #dfe3ea; --text: #1d2330; --muted: #667085;
+    --brand: #1a5fd0; --ok: #1f7a4d; --ok-bg: #e7f5ee; --wait: #a15c00; --wait-bg: #fff4e0;
+    --stop: #b42318; --stop-bg: #fdecea; --mark: #7a2ff0; --ink: #0f2a57;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 "Segoe UI", Roboto, Arial, sans-serif; }
+  code { font-size: 12px; background: #f1f3f6; padding: 0 4px; border-radius: 4px; }
+
+  /* Thanh điều khiển demo (không thuộc sản phẩm) */
+  .demo-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 8px 20px; background: #2b2f3a; color: #cfd5e1; font-size: 12.5px; }
+  .demo-bar b { color: #fff; margin-right: 4px; }
+  .demo-bar button { font: inherit; border: 1px solid #555c6b; background: #3a404d; color: #fff; border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+  .demo-bar button.on { background: #fff; color: #2b2f3a; font-weight: 700; }
+  .demo-bar .sep { width: 1px; height: 18px; background: #555c6b; margin: 0 4px; }
+  .demo-bar label { cursor: pointer; }
+
+  .stage { display: grid; grid-template-columns: 400px 1fr; gap: 20px; padding: 16px 20px 20px; align-items: start; }
+  .caption { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 0 0 6px 4px; font-weight: 700; }
+
+  /* ===== Điện thoại của khách ===== */
+  .phone { width: 390px; height: 860px; background: #fff; border: 10px solid #1b1f27; border-radius: 40px; overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 8px 30px rgba(0,0,0,.18); }
+  .p-top { background: var(--ink); color: #fff; padding: 10px 14px 8px; }
+  .p-top .t1 { display: flex; justify-content: space-between; font-size: 11px; opacity: .8; }
+  .p-top .t2 { font-weight: 700; font-size: 15px; margin-top: 2px; }
+  .p-top .ai-note { font-size: 10.5px; line-height: 1.5; margin-top: 4px; background: rgba(255,255,255,.14); border-radius: 8px; padding: 4px 8px; }
+  .p-top .ai-note .lvl { font-size: 10px; }
+  .booking { padding: 5px 12px; border-bottom: 1px solid var(--line); background: #fafbfc; font-size: 11.5px; line-height: 1.35; }
+  .booking .r1 { display: flex; justify-content: space-between; gap: 6px; align-items: center; }
+  .statusbar { padding: 6px 12px; font-size: 12px; font-weight: 600; border-bottom: 1px solid var(--line); }
+  .statusbar.hold { background: var(--wait-bg); color: var(--wait); }
+  .statusbar.done { background: var(--ok-bg); color: var(--ok); }
+  .statusbar.stop { background: var(--stop-bg); color: var(--stop); }
+  .statusbar.idle { background: #f4f6f9; color: var(--muted); }
+  .p-chat { flex: 1; overflow-y: auto; padding: 10px 10px 6px; display: flex; flex-direction: column; gap: 8px; background: #f7f8fa; }
+  .msg { padding: 7px 10px; border-radius: 14px; max-width: 88%; white-space: pre-line; font-size: 13.5px; }
+  .msg.user { align-self: flex-end; background: var(--brand); color: #fff; border-bottom-right-radius: 4px; }
+  .msg.ai { align-self: flex-start; background: #fff; border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+  .msg .who { display: block; font-size: 10.5px; color: var(--muted); margin-bottom: 1px; }
+  .msg.sys { align-self: center; max-width: 95%; font-size: 12px; color: var(--muted); font-style: italic; text-align: center; background: transparent; padding: 2px 6px; }
+  .chips { display: flex; gap: 6px; padding: 6px 10px 0; flex-wrap: wrap; background: #fff; border-top: 1px solid var(--line); }
+  .chips button { font: inherit; font-size: 12.5px; border: 1px solid var(--brand); color: var(--brand); background: #fff; border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+  .chips .note { font-size: 11px; color: var(--muted); width: 100%; }
+  form.p-input { display: flex; gap: 6px; padding: 6px 10px 12px; background: #fff; }
+  form.p-input input { flex: 1; padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; font: inherit; }
+  form.p-input button { border: 0; background: var(--brand); color: #fff; border-radius: 999px; padding: 0 14px; font: inherit; font-weight: 700; cursor: pointer; }
+
+  /* Thẻ trong chat */
+  .ccard { align-self: stretch; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 9px 10px; font-size: 13px; position: relative; }
+  .ccard.pending { border: 2px dashed var(--wait); background: #fffaf0; }
+  .ccard.stale { opacity: .55; background: #f1f2f4; border-style: solid; }
+  .ccard .hd { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .ccard .hd b { font-size: 13.5px; }
+  .flights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin: 4px 0; }
+  .flight { border: 2px solid var(--line); border-radius: 9px; padding: 5px; cursor: pointer; background: #fff; font: inherit; font-size: 12px; text-align: left; }
+  .flight b { font-size: 13px; }
+  .flight.sel { border-color: var(--brand); background: #eef4ff; }
+  .flight[disabled] { cursor: not-allowed; opacity: .55; background: #f5f5f5; }
+  .pax label { display: flex; gap: 6px; align-items: center; padding: 2px 0; cursor: pointer; font-size: 13px; }
+  .summary { background: #f4f7fc; border-radius: 8px; padding: 6px 8px; margin-top: 6px; font-size: 12.5px; }
+  .warn { background: var(--stop-bg); color: var(--stop); border-radius: 8px; padding: 6px 8px; margin-top: 6px; font-weight: 600; font-size: 12.5px; position: relative; }
+  .info { background: var(--wait-bg); color: var(--wait); border-radius: 8px; padding: 6px 8px; margin-top: 6px; font-size: 12.5px; }
+  .receipt { align-self: stretch; border: 1.5px solid var(--ok); background: var(--ok-bg); border-radius: 12px; padding: 8px 10px; font-size: 13px; position: relative; }
+  .receipt.sent { border-color: var(--stop); background: #fff6f5; }
+  .receipt .rh { font-size: 10.5px; font-weight: 700; letter-spacing: .05em; color: var(--ok); text-transform: uppercase; }
+  .receipt.sent .rh { color: var(--stop); }
+  .handoff { align-self: stretch; border: 1.5px solid #8aa4cf; background: #eef3fb; border-radius: 12px; padding: 8px 10px; font-size: 12.5px; }
+  .handoff b { color: var(--ink); }
+  .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 7px; }
+  .btn { font: inherit; font-size: 12.5px; border-radius: 8px; padding: 6px 10px; cursor: pointer; border: 1px solid var(--line); background: #fff; }
+  .btn.primary { background: var(--brand); color: #fff; border-color: var(--brand); font-weight: 700; }
+  .btn.danger { background: var(--stop); color: #fff; border-color: var(--stop); font-weight: 700; }
+  .btn[disabled] { background: #e6e9ee; color: #98a2b3; border-color: #e6e9ee; cursor: not-allowed; }
+  .small { font-size: 12px; } .muted { color: var(--muted); }
+  .tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
+  .tag.cancel, .tag.stop { background: var(--stop-bg); color: var(--stop); }
+  .tag.ok { background: var(--ok-bg); color: var(--ok); }
+  .tag.wait { background: var(--wait-bg); color: var(--wait); }
+  .tag.grey { background: #e9ecf1; color: var(--muted); }
+  .lvl { font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 4px; white-space: nowrap; display: inline-block; }
+  .lvl.auto { background: var(--ok-bg); color: var(--ok); border: 1px solid #b7e0c9; }
+  .lvl.approve { background: var(--wait-bg); color: var(--wait); border: 1px solid #f3d29a; }
+  .lvl.ban { background: var(--stop-bg); color: var(--stop); border: 1px solid #f4b6af; }
+  .lvl.none { background: #eef0f4; color: var(--muted); border: 1px solid var(--line); }
+
+  /* Bảng trượt xác nhận lần cuối (trong điện thoại) */
+  .sheet-bg { position: absolute; inset: 0; background: rgba(15,23,42,.45); display: flex; align-items: flex-end; z-index: 10; }
+  .sheet { background: #fff; width: 100%; border-radius: 18px 18px 0 0; padding: 14px 14px 18px; position: relative; }
+  .sheet .grab { width: 40px; height: 4px; background: #d0d5dd; border-radius: 4px; margin: 0 auto 10px; }
+  .sheet h3 { margin: 0 0 6px; font-size: 15px; }
+  .twin { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .twin .btn { padding: 11px 6px; font-size: 13px; }
+
+  /* ===== Màn hình nội bộ ===== */
+  .ops { background: #fff; border: 1px solid var(--line); border-radius: 12px; min-height: 860px; display: flex; flex-direction: column; }
+  .ops-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: #f8f9fb; border-radius: 12px 12px 0 0; flex-wrap: wrap; }
+  .ops-head h2 { margin: 0; font-size: 15px; }
+  .ops-head .who { font-size: 12px; color: var(--muted); }
+  .ops-tabs { display: flex; gap: 4px; margin-left: auto; }
+  .ops-tabs button { font: inherit; font-size: 13px; border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 5px 12px; cursor: pointer; }
+  .ops-tabs button.on { background: var(--ink); color: #fff; border-color: var(--ink); font-weight: 700; }
+  .ops-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; }
+  .panel { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; position: relative; }
+  .panel h3 { margin: 0 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .kv { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .kv div { background: #f6f7f9; border-radius: 8px; padding: 6px 8px; font-size: 12.5px; }
+  .kv b { display: block; font-size: 13.5px; }
+  table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 5px 6px; text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; background: #fafbfc; }
+  td.t { font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+  tr.hl td { background: #fffaf0; }
+  .q { border: 1px solid #8aa4cf; background: #f5f8fd; border-radius: 8px; padding: 8px 10px; margin-top: 6px; font-size: 12.5px; }
+  .q ul { margin: 4px 0 0; padding-left: 18px; }
+  .empty { color: var(--muted); font-size: 12.5px; font-style: italic; }
+
+  /* Số đánh dấu cho ảnh chụp */
+  body.marks [data-mark] { outline: 2px solid var(--mark); outline-offset: 1px; }
+  body.marks [data-mark]::after {
+    content: attr(data-mark); position: absolute; top: -10px; left: -10px; z-index: 6;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--mark); color: #fff;
+    font: 700 12px/22px "Segoe UI", Arial, sans-serif; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,.3);
+  }
+  [data-mark] { position: relative; }
+  body.marks .phone [data-mark]::after { top: 3px; left: 3px; }
+  body.marks .phone [data-mark] { outline-offset: -2px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="demo-bar">
+  <b>Điều khiển demo</b>
+  <button data-case="kb4" class="on">Ca 1 · “Ừ đổi đi” (KB4)</button>
+  <button data-case="kb3">Ca 2 · “Thôi huỷ hết đi” (KB3)</button>
+  <span class="sep"></span>
+  <button data-demo="expire">⏩ Tua hết 20 phút giữ chỗ</button>
+  <button data-demo="failNext">✖ Lần giữ chỗ tới sẽ thất bại</button>
+  <button data-demo="restart">↺ Làm lại từ đầu</button>
+  <span class="sep"></span>
+  <label><input type="checkbox" id="markToggle"> Hiện số đánh dấu</label>
+</div>
+
+<div class="stage">
+  <div>
+    <div class="caption">Màn hình khách · ứng dụng Bay Mẫu</div>
+    <div class="phone" id="phone">
+      <div class="p-top" data-mark="4">
+        <div class="t1"><span id="pclock">15:00</span><span>Đặt chỗ của tôi</span></div>
+        <div class="t2">Trợ lý đặt chỗ</div>
+        <div class="ai-note">🤖 Bạn đang trò chuyện với <b>trợ lý AI</b>, không phải nhân viên.<br>
+          <span class="lvl auto">Tự làm</span> tra cứu · giữ chỗ 20' · soạn nháp · chuyển nhân viên<br>
+          <span class="lvl approve">Bạn xác nhận</span> đổi vé · gửi hoàn &nbsp;<span class="lvl ban">Không làm</span> trẻ bay một mình · đổi tên · bồi thường</div>
+      </div>
+      <div class="booking" data-mark="3" id="booking"></div>
+      <div class="statusbar" id="statusbar"></div>
+      <div class="p-chat" id="chat"></div>
+      <div class="chips" id="chips"></div>
+      <form class="p-input" id="chatForm">
+        <input id="chatInput" placeholder="Nhắn cho trợ lý…" autocomplete="off">
+        <button type="submit">Gửi</button>
+      </form>
+      <div class="sheet-bg" id="sheet" hidden></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="caption">Màn hình nội bộ · nhân viên hỗ trợ / quản lý (khách không thấy)</div>
+    <div class="ops">
+      <div class="ops-head">
+        <h2>Bay Mẫu · Bảng điều phối trợ lý</h2>
+        <span class="who">Phiên: TRV-7Q2K · <span id="opsCase"></span></span>
+        <div class="ops-tabs">
+          <button data-page="log" class="on">Nhật ký & quyết định</button>
+          <button data-page="tools">Tool & mức tự chủ</button>
+        </div>
+      </div>
+      <div class="ops-body" id="opsLog"></div>
+      <div class="ops-body" id="opsTools" hidden></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== Dữ liệu dựng của track T3 (fixture) — không có dữ liệu thật =====
+const FLIGHTS = {
+  BM217: { code: 'BM 217', date: '12/11', time: '21:00', seats: 1 },
+  BM201: { code: 'BM 201', date: '13/11', time: '07:00', seats: 9 },
+  BM205: { code: 'BM 205', date: '13/11', time: '09:30', seats: 4 }
+};
+const PAX = { an: 'Nguyễn Minh An', binh: 'Nguyễn Gia Bình' };
+const HOLD_MS = 20 * 60 * 1000;
+const T0 = Date.now();
+const LVL = { auto: 'AI tự làm', approve: 'Khách xác nhận', ban: 'Cấm → nhân viên', none: '—' };
+
+const TOOLS = [
+  { name: 'tra_cuu_dat_cho', lvl: 'auto', rule: 'Chỉ đọc. Không cần ai duyệt.', why: 'Sai thì lỗi ở câu trả lời, không ở việc đọc; bắt chờ duyệt chỉ làm chậm.' },
+  { name: 'giu_cho_chuyen_moi', lvl: 'auto', rule: 'Chỉ giữ khi đủ chỗ cho tất cả hành khách đi cùng; mỗi lần một chuyến; thất bại thì nói thất bại.', why: 'Hết 20 phút tự nhả; chờ người thì chuyến phù hợp có thể hết chỗ.' },
+  { name: 'doi_chuyen_bay', lvl: 'approve', rule: 'Nút chỉ bật khi đã chọn chuyến + đủ người, giữ chỗ còn hiệu lực trên đúng chuyến. Tin chat không tính là xác nhận.', why: 'Dùng lần đổi miễn phí duy nhất; không có tool hoàn tác.' },
+  { name: 'soan_yeu_cau_hoan', lvl: 'auto', rule: 'Tách mới từ gửi hoàn. Chỉ tạo bản nháp.', why: 'Nháp sai thì khách thấy và sửa; chưa gửi gì.' },
+  { name: 'gui_yeu_cau_hoan_ve', lvl: 'approve', rule: 'Chỉ mở khi đủ nơi nhận tiền + thời gian hoàn; khách xác nhận 2 bước, bước 2 có nút "Đổi chuyến thay vì hoàn" ngang hàng.', why: 'Gửi rồi không huỷ được.' },
+  { name: 'chuyen_nhan_vien', lvl: 'auto', rule: 'Luôn kèm tóm tắt để khách không phải kể lại. Không hứa thời gian chờ.', why: 'Chuyển thừa chỉ chậm, không mất tiền hay vé.' }
+];
+const BANS = [
+  { key: 'child', what: 'Đổi vé cho trẻ em mà không có người lớn cùng chuyến / tách đoàn', kb: 'KB7' },
+  { key: 'redo', what: 'Gọi doi_chuyen_bay lần hai để "chữa" lần đổi nhầm; gợi ý hoàn vé làm lối thoát', kb: 'KB9, KB5' },
+  { key: 'chat', what: 'Coi tin nhắn chat là quyền duyệt (kể cả tin tự xưng nhân viên hãng)', kb: 'KB10' },
+  { key: 'promise', what: 'Hứa đổi tên, hứa bồi thường tiền mặt', kb: 'KB6, KB8' }
+];
+
+const $ = id => document.getElementById(id);
+let S;
+function fresh() {
+  return {
+    tab: 'kb4', page: 'log', freeChangeUsed: false, refundSent: false, failNext: false,
+    chat: { kb4: [], kb3: [] }, log: [], queue: [], bans: { child: 0, redo: 0, chat: 0, promise: 0 }, calls: {},
+    kb4: { flight: null, pax: { an: false, binh: false }, hold: null, cardId: 0, done: false, staff: false, busy: false, expired: false },
+    kb3: { pax: { an: false, binh: false }, dataFilled: false, cardId: 0, staff: false, busy: false, sheet: false }
+  };
+}
+
+// ===== Tiện ích =====
+function clock() { const d = new Date(Date.UTC(2026, 10, 12, 15, 0, 0) + (Date.now() - T0)); return d.toISOString().substr(11, 8); }
+function fmt(ms) { const s = Math.ceil(ms / 1000); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
+function esc(t) { return String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function names(p) { return [p.an && PAX.an, p.binh && PAX.binh].filter(Boolean).join(' và '); }
+function say(tab, who, text) { S.chat[tab].push({ who, text }); }
+function push(tab, msg) { S.chat[tab].push(msg); }
+function log(tab, actor, tool, lvl, detail) {
+  S.log.push({ t: clock(), tab, actor, tool, lvl, detail });
+  if (tool && actor === 'AI') S.calls[tool] = (S.calls[tool] || 0) + 1;
+}
+function holdLeft() { const h = S.kb4.hold; return h ? Math.max(0, h.until - Date.now()) : 0; }
+
+// ===== Tool giả lập: câu báo cho khách chỉ sinh TỪ kết quả trả về =====
+function toolHold(key) {
+  const f = FLIGHTS[key];
+  let r;
+  if (S.failNext) { S.failNext = false; r = { ok: false, reason: 'hệ thống giữ chỗ không phản hồi' }; }
+  else if (f.seats < 2) r = { ok: false, reason: f.code + ' chỉ còn ' + f.seats + ' chỗ, không đủ cho 2 người' };
+  else r = { ok: true, flight: key, n: 2, until: Date.now() + HOLD_MS };
+  log('kb4', 'AI', 'giu_cho_chuyen_moi', 'auto', r.ok ? 'Giữ 2 chỗ ' + f.code + ' · 20 phút' : 'THẤT BẠI · ' + r.reason);
+  if (r.ok) { S.kb4.hold = r; S.kb4.expired = false; }
+  else { S.kb4.hold = null; }
+  return r;
+}
+function handoff(tab, reason, lines) {
+  log(tab, 'AI', 'chuyen_nhan_vien', 'auto', reason);
+  S.queue.push({ tab, t: clock(), reason, lines });
+  push(tab, { who: 'handoff', reason, lines });
+}
+function newCard(tab) { S[tab].cardId++; push(tab, { who: 'card', id: S[tab].cardId }); }
+
+// ===== Khởi tạo hai ca =====
+function initKb4() {
+  say('kb4', 'user', 'Chuyến bị huỷ rồi à? Giờ sao đây?');
+  log('kb4', 'AI', 'tra_cuu_dat_cho', 'auto', 'BM 213 ĐÃ HUỶ (bão) · 2 hành khách · 3 chuyến thay thế');
+  say('kb4', 'ai', 'Chuyến BM 213 lúc 19:00 hôm nay đã bị huỷ do bão. Bạn được đổi miễn phí một lần trong 48 giờ hoặc hoàn toàn bộ. Chuyến thay thế còn chỗ: BM 217 21:00 hôm nay (còn 1 chỗ), BM 201 07:00 sáng 13/11 (còn 9 chỗ), BM 205 09:30 sáng 13/11 (còn 4 chỗ).');
+  say('kb4', 'user', 'Ừ đổi đi.');
+  log('kb4', 'Khách', '', 'none', 'Nhắn "Ừ đổi đi." → không tính là xác nhận (chưa rõ chuyến, người)');
+  const r = toolHold('BM201');
+  say('kb4', 'ai', 'Mình chưa đổi vé. Bạn chọn BM 201 lúc 07:00 hay BM 205 lúc 09:30 ngày 13/11/2026, và đổi cho Nguyễn Minh An, Nguyễn Gia Bình hay cả hai? Nếu hai mẹ con đi cùng, mình đề xuất BM 201.' +
+    (r.ok ? ' Mình đang giữ tạm 2 chỗ BM 201 trong 20 phút — giữ chỗ chưa phải đã đổi vé.' : ' Mình chưa giữ được chỗ, bạn chọn chuyến để mình thử lại.') +
+    ' Xác nhận đổi sẽ dùng lần đổi miễn phí duy nhất.');
+  newCard('kb4');
+}
+function initKb3() {
+  say('kb3', 'user', 'Thôi huỷ hết đi, hoàn tiền cho mình.');
+  log('kb3', 'AI', 'tra_cuu_dat_cho', 'auto', 'BM 213 ĐÃ HUỶ · 2 hành khách · THIẾU nơi nhận tiền, thời gian hoàn');
+  log('kb3', 'AI', 'soan_yeu_cau_hoan', 'auto', 'Bản nháp · CHƯA GỬI · chưa chọn người');
+  say('kb3', 'ai', 'Mình chưa gửi yêu cầu hoàn. Bạn muốn hoàn vé BM 213 Hà Nội → TP.HCM, 19:00 ngày 12/11/2026, cho cả Nguyễn Minh An và Nguyễn Gia Bình hay chỉ một người? Lưu ý: yêu cầu hoàn đã gửi thì không huỷ được, và bạn vẫn còn quyền đổi miễn phí một lần trong 48 giờ. Hồ sơ hiện chưa có nơi nhận tiền và thời gian hoàn, nên mình chuyển nhân viên kiểm tra trước khi bạn xác nhận gửi.');
+  S.kb3.staff = true;
+  handoff('kb3', 'Thiếu dữ liệu hoàn vé', ['Tin gốc: "Thôi huỷ hết đi, hoàn tiền cho mình."', 'Cần bổ sung: nơi nhận tiền, thời gian hoàn', 'Hành khách: chưa chốt (An / Bình / cả hai)', 'Trạng thái: CHƯA GỬI HOÀN — chỉ khách được bấm gửi']);
+  newCard('kb3');
+}
+
+// ===== Render: điện thoại =====
+function renderBooking() {
+  $('booking').innerHTML =
+    '<div class="r1"><b>BM 213 · HN → TP.HCM · 19:00 12/11</b><span class="tag cancel">ĐÃ HUỶ do bão</span></div>' +
+    '<div>' + PAX.an + ' (34) · ' + PAX.binh + ' (5) · Đổi miễn phí 1 lần/48 giờ <span class="tag ' + (S.freeChangeUsed ? 'stop">đã dùng' : 'ok">còn lượt') + '</span> · hoặc hoàn toàn bộ</div>' +
+    '<div class="muted">Nguồn: <code>tra_cuu_dat_cho</code> · tra lúc 15:00 · số chỗ có thể đổi sau thời điểm này</div>';
+}
+function renderStatus() {
+  const el = $('statusbar'), k = S.kb4;
+  let cls = 'idle', txt = '';
+  if (S.refundSent) { cls = 'stop'; txt = 'Đã gửi yêu cầu hoàn cho ' + names(S.kb3.pax) + ' · không huỷ được'; }
+  else if (k.done) { cls = 'done'; txt = '✓ Đã đổi vé sang ' + FLIGHTS[k.flight].code + ' ' + FLIGHTS[k.flight].time + ' ' + FLIGHTS[k.flight].date; }
+  else if (k.hold && holdLeft() > 0) { cls = 'hold'; txt = 'Đã giữ 2 chỗ ' + FLIGHTS[k.hold.flight].code + ' · còn <span class="timer">' + fmt(holdLeft()) + '</span> · CHƯA đổi vé'; }
+  else if (k.expired) { cls = 'stop'; txt = 'Chỗ giữ đã tự nhả · vé chưa đổi · lượt miễn phí còn nguyên'; }
+  else { cls = 'stop'; txt = 'Chưa giữ chỗ nào · vé chưa đổi'; }
+  if (S.tab === 'kb3' && !S.refundSent) txt += S.kb3.staff ? ' · Hoàn vé: CHƯA GỬI, đang chờ nhân viên' : '';
+  el.className = 'statusbar ' + cls; el.innerHTML = txt;
+}
+
+function kb4Check() {
+  const k = S.kb4;
+  const both = k.pax.an && k.pax.binh, any = k.pax.an || k.pax.binh;
+  const holdOk = k.hold && holdLeft() > 0 && k.hold.flight === k.flight;
+  return { both, split: any && !both, holdOk, can: !k.done && !k.busy && !S.refundSent && k.flight && both && holdOk };
+}
+function cardKb4(m) {
+  const k = S.kb4;
+  if (m.id !== k.cardId) return '<div class="ccard stale"><div class="hd"><b>Chờ xác nhận · đổi chuyến</b><span class="tag grey">Đã hết hiệu lực</span></div><div class="small">Thẻ này không còn dùng được — dùng thẻ mới nhất bên dưới.</div></div>';
+  if (k.done) return '<div class="ccard stale"><div class="hd"><b>Chờ xác nhận · đổi chuyến</b><span class="tag grey">Đã dùng</span></div></div>';
+  if (S.refundSent) return '<div class="ccard stale"><div class="hd"><b>Chờ xác nhận · đổi chuyến</b><span class="tag grey">Không còn hiệu lực</span></div><div class="small">Đã gửi yêu cầu hoàn nên không thể đổi chuyến.</div></div>';
+  const c = kb4Check();
+  if (k.expired) return '<div class="ccard pending" data-mark="1"><div class="hd"><b>Chờ xác nhận · đổi chuyến</b><span class="tag stop">Hết hạn giữ chỗ</span></div>' +
+    '<div class="small">Chỗ giữ đã tự nhả. Vé chưa đổi, lượt miễn phí còn nguyên. Số chỗ có thể đã thay đổi.</div>' +
+    '<div class="actions"><button class="btn primary" data-act="rehold">Tra & giữ lại chỗ</button><button class="btn" data-act="staff4">Nhờ nhân viên</button></div></div>';
+  const fb = key => {
+    const f = FLIGHTS[key], ok = f.seats >= 2;
+    return '<button class="flight' + (k.flight === key ? ' sel' : '') + '" data-flight="' + key + '"' + (ok ? '' : ' disabled') + '><b>' + f.code + '</b> ' + f.time + '<br>' + f.date + ' · còn ' + f.seats + (ok ? '' : '<br><span style="color:var(--stop)">không đủ 2 chỗ</span>') + '</button>';
+  };
+  let sum = '';
+  if (k.flight && c.both) { const f = FLIGHTS[k.flight]; sum = '<div class="summary"><b>BM 213 (đã huỷ) → ' + f.code + ' ' + f.time + ' ' + f.date + '</b><br>Người bay: ' + PAX.an + ', ' + PAX.binh + ' · phí 0đ<br><span style="color:var(--stop);font-weight:600">Dùng lần đổi miễn phí duy nhất — trợ lý không hoàn tác được.</span></div>'; }
+  const split = c.split ? '<div class="warn" data-mark="6">Bé Gia Bình 5 tuổi không thể tách khỏi người lớn đi cùng. <span class="lvl ban">Không làm</span> Trợ lý không tự đổi vé trường hợp này.<div class="actions"><button class="btn" data-act="staffChild">Chuyển nhân viên</button></div></div>' : '';
+  const miss = [];
+  if (!k.flight) miss.push('chọn chuyến'); if (!c.both) miss.push('chọn đủ người đi cùng');
+  if (k.flight && !c.holdOk) miss.push('giữ chỗ còn hiệu lực trên chuyến này');
+  return '<div class="ccard pending" data-mark="1"><div class="hd"><b>Chờ xác nhận · đổi chuyến</b><span class="lvl approve">Bạn xác nhận</span></div>' +
+    '<div class="small muted">1 · Chuyến (BM 217 khoá vì chỉ còn 1 chỗ)</div><div class="flights">' + fb('BM217') + fb('BM201') + fb('BM205') + '</div>' +
+    '<div class="small muted">2 · Người bay (không chọn sẵn)</div><div class="pax">' +
+    '<label><input type="checkbox" data-pax="an"' + (k.pax.an ? ' checked' : '') + '> ' + PAX.an + ' (34)</label>' +
+    '<label><input type="checkbox" data-pax="binh"' + (k.pax.binh ? ' checked' : '') + '> ' + PAX.binh + ' (5)</label></div>' +
+    split + sum + (miss.length && !c.split ? '<div class="small muted" style="margin-top:4px">Nút bật khi: ' + miss.join(' · ') + '.</div>' : '') +
+    '<div class="actions"><button class="btn primary" data-act="confirm"' + (c.can ? '' : ' disabled') + '>' + (k.busy ? 'Đang đổi vé…' : 'Xác nhận đổi vé') + '</button>' +
+    '<span data-mark="2" style="display:inline-flex"><button class="btn" data-act="reset">Sửa lựa chọn</button></span>' +
+    '<button class="btn" data-act="staff4">Nhờ nhân viên</button></div></div>';
+}
+function cardKb3(m) {
+  const k = S.kb3;
+  if (m.id !== k.cardId) return '<div class="ccard stale"><div class="hd"><b>Bản nháp yêu cầu hoàn</b><span class="tag grey">Đã hết hiệu lực</span></div></div>';
+  if (S.refundSent) return '<div class="ccard stale"><div class="hd"><b>Bản nháp yêu cầu hoàn</b><span class="tag grey">Đã gửi</span></div></div>';
+  const any = k.pax.an || k.pax.binh;
+  const field = (l, v) => '<div class="row small"><span style="min-width:96px">' + l + '</span>' + (v ? '<b>' + v + '</b> <span class="tag ok">NV xác nhận · dữ liệu giả</span>' : '<span class="tag stop">chưa có dữ liệu</span>') + '</div>';
+  return '<div class="ccard pending" data-mark="1"><div class="hd"><b>Bản nháp yêu cầu hoàn</b><span class="tag wait">CHƯA GỬI</span></div>' +
+    '<div class="small muted">Hoàn cho ai? (không chọn sẵn)</div><div class="pax">' +
+    '<label><input type="checkbox" data-rpax="an"' + (k.pax.an ? ' checked' : '') + '> ' + PAX.an + '</label>' +
+    '<label><input type="checkbox" data-rpax="binh"' + (k.pax.binh ? ' checked' : '') + '> ' + PAX.binh + '</label></div>' +
+    field('Nơi nhận tiền:', k.dataFilled ? 'Phương thức thanh toán ban đầu' : '') + field('Thời gian hoàn:', k.dataFilled ? '7–14 ngày làm việc' : '') +
+    '<div class="warn">Gửi rồi không huỷ được. Bạn vẫn còn quyền đổi miễn phí 1 lần trong 48 giờ.</div>' +
+    '<div class="actions">' + (k.dataFilled
+      ? '<button class="btn primary" data-act="step1"' + (any && !k.busy ? '' : ' disabled') + '>Xác nhận gửi yêu cầu hoàn</button>'
+      : '<span class="small muted">Nút gửi chỉ xuất hiện khi đủ nơi nhận tiền và thời gian hoàn.</span>') +
+    '<span data-mark="2" style="display:inline-flex"><button class="btn" data-act="reset3">Sửa lựa chọn</button></span>' +
+    '<button class="btn" data-act="toKb4">Đổi chuyến thay vì hoàn</button></div></div>';
+}
+function receipt(m) {
+  return '<div class="receipt' + (m.sent ? ' sent' : '') + '" data-mark="8"><div class="rh">Kết quả hệ thống · ' + m.tool + ' · ' + m.t + '</div>' + m.html + '</div>';
+}
+function renderChat() {
+  const box = $('chat');
+  box.innerHTML = S.chat[S.tab].map(m => {
+    if (m.who === 'card') return S.tab === 'kb4' ? cardKb4(m) : cardKb3(m);
+    if (m.who === 'receipt') return receipt(m);
+    if (m.who === 'handoff') return '<div class="handoff"><b>👤 Đã chuyển nhân viên · đang chờ</b><br>Nhân viên đã có sẵn thông tin dưới đây, bạn không phải kể lại. Trợ lý không hứa thời gian phản hồi.<ul style="margin:4px 0 0;padding-left:16px">' + m.lines.map(l => '<li>' + esc(l) + '</li>').join('') + '</ul></div>';
+    return '<div class="msg ' + m.who + '">' + (m.who === 'ai' ? '<span class="who">Trợ lý AI</span>' : '') + esc(m.text) + '</div>';
+  }).join('');
+  box.scrollTop = box.scrollHeight;
+}
+function renderChips() {
+  let chips = [];
+  if (S.tab === 'kb4' && !S.kb4.done && !S.refundSent) chips = [['BM 201 · cả hai', 'chip201'], ['BM 205 · cả hai', 'chip205'], ['Nhờ nhân viên', 'staff4']];
+  if (S.tab === 'kb3' && !S.refundSent) chips = [['Hoàn cho cả hai', 'chipBoth'], ['Đổi chuyến thay vì hoàn', 'toKb4'], ['Nhờ nhân viên', 'staff3']];
+  $('chips').innerHTML = chips.length ? chips.map(c => '<button data-act="' + c[1] + '">' + c[0] + '</button>').join('') + '<span class="note">Nút gợi ý chỉ điền lựa chọn vào thẻ — không xác nhận thay bạn.</span>' : '';
+}
+function renderSheet() {
+  const k = S.kb3, el = $('sheet');
+  el.hidden = !k.sheet || S.tab !== 'kb3';
+  if (el.hidden) return;
+  el.innerHTML = '<div class="sheet" data-mark="5"><div class="grab"></div><h3>Xác nhận lần cuối · gửi yêu cầu hoàn</h3>' +
+    '<div class="small">Hoàn vé cho <b>' + names(k.pax) + '</b> · BM 213 HN → TP.HCM 19:00 12/11/2026 · tiền về phương thức thanh toán ban đầu · 7–14 ngày làm việc. <b>Bạn sẽ mất quyền đổi miễn phí</b> cho người được hoàn.</div>' +
+    '<div class="warn">Gửi rồi không huỷ được.</div>' +
+    '<div class="twin"><button class="btn danger" data-act="send">Gửi yêu cầu hoàn</button><button class="btn primary" data-act="sheetSwitch">Đổi chuyến thay vì hoàn<br><span style="font-weight:400;font-size:11px">còn miễn phí trong 48 giờ</span></button></div>' +
+    '<div class="actions"><button class="btn" data-act="sheetBack">← Quay lại sửa lựa chọn</button></div></div>';
+}
+
+// ===== Render: màn hình nội bộ =====
+function renderOps() {
+  document.querySelectorAll('.ops-tabs button').forEach(b => b.classList.toggle('on', b.dataset.page === S.page));
+  $('opsLog').hidden = S.page !== 'log'; $('opsTools').hidden = S.page !== 'tools';
+  $('opsCase').textContent = S.tab === 'kb4' ? 'đang xem Ca 1 (KB4)' : 'đang xem Ca 2 (KB3)';
+  const k4 = S.kb4;
+  const state = S.refundSent ? 'Đã gửi hoàn (' + names(S.kb3.pax) + ')' : k4.done ? 'Đã đổi sang ' + FLIGHTS[k4.flight].code : (k4.hold && holdLeft() > 0) ? 'Đang giữ 2 chỗ ' + FLIGHTS[k4.hold.flight].code : 'Chưa giữ, chưa đổi';
+  const q = S.queue.length
+    ? S.queue.map((x, i) => '<div class="q"><div class="row"><b>#' + (i + 1) + ' · ' + esc(x.reason) + '</b>' + (x.resolved ? '<span class="tag ok">' + x.resolved + '</span>' : '<span class="tag wait">Đang chờ</span>') + '<span class="muted small">' + x.t + ' · ' + (x.tab === 'kb4' ? 'Ca 1' : 'Ca 2') + '</span></div><ul>' + x.lines.map(l => '<li>' + esc(l) + '</li>').join('') + '</ul>' +
+      (x.tab === 'kb3' && x.reason === 'Thiếu dữ liệu hoàn vé' && !S.kb3.dataFilled ? '<div class="actions"><button class="btn primary" data-act="fill">Bổ sung nơi nhận tiền + thời gian hoàn</button><span class="small muted">Nhân viên chỉ bổ sung dữ liệu — không gửi hoàn thay khách.</span></div>' : '') + '</div>').join('')
+    : '<div class="empty">Chưa có cuộc nào cần nhân viên.</div>';
+  const rows = S.log.filter(l => l.tab === S.tab).map(l =>
+    '<tr' + (l.lvl === 'approve' || l.lvl === 'ban' ? ' class="hl"' : '') + '><td class="t">' + l.t + '</td><td>' + l.actor + '</td><td>' + (l.tool ? '<code>' + l.tool + '</code>' : '') + '</td><td><span class="lvl ' + l.lvl + '">' + LVL[l.lvl] + '</span></td><td>' + esc(l.detail) + '</td></tr>').join('');
+  $('opsLog').innerHTML =
+    '<div class="panel"><h3>Tình trạng đặt chỗ</h3><div class="kv">' +
+      '<div>Chuyến gốc<b>BM 213 · ĐÃ HUỶ</b></div><div>Hành khách<b>2 (1 trẻ 5 tuổi)</b></div>' +
+      '<div>Lượt đổi miễn phí<b>' + (S.freeChangeUsed ? 'Đã dùng' : 'Còn') + '</b></div><div>Hiện tại<b>' + state + '</b></div></div></div>' +
+    '<div class="panel" data-mark="7"><h3>Hàng chờ chuyển nhân viên</h3>' + q + '</div>' +
+    '<div class="panel"><h3>Nhật ký hội thoại & quyết định · ' + (S.tab === 'kb4' ? 'Ca 1' : 'Ca 2') + '</h3><table><tr><th>Giờ</th><th>Ai</th><th>Tool</th><th>Mức</th><th>Chi tiết / kết quả</th></tr>' + rows + '</table>' +
+    '<div class="small muted" style="margin-top:6px">Dòng tô vàng = thao tác cần khách xác nhận hoặc bị chặn. Mỗi lần đổi vé / gửi hoàn đều ghi ai bấm, lúc nào.</div></div>';
+  $('opsTools').innerHTML =
+    '<div class="panel" data-mark="9"><h3>Mức tự chủ của trợ lý (nhóm chốt ở §4 — chỉ xem)</h3><table><tr><th>Tool</th><th>Mức</th><th>Luật / điều kiện</th><th>Vì sao (cái giá khi sai)</th><th>Đã gọi</th></tr>' +
+    TOOLS.map(t => '<tr><td><code>' + t.name + '</code></td><td><span class="lvl ' + t.lvl + '">' + LVL[t.lvl] + '</span></td><td>' + t.rule + '</td><td>' + t.why + '</td><td>' + (S.calls[t.name] || 0) + '</td></tr>').join('') + '</table></div>' +
+    '<div class="panel"><h3>Cấm theo ngữ cảnh — trợ lý không làm, chuyển nhân viên</h3><table><tr><th>Việc bị cấm</th><th>Kịch bản</th><th>Đã chặn</th></tr>' +
+    BANS.map(b => '<tr><td>' + b.what + '</td><td>' + b.kb + '</td><td>' + S.bans[b.key] + '</td></tr>').join('') + '</table></div>';
+}
+
+function render() {
+  $('pclock').textContent = clock().substr(0, 5);
+  document.querySelectorAll('[data-case]').forEach(b => b.classList.toggle('on', b.dataset.case === S.tab));
+  renderBooking(); renderStatus(); renderChat(); renderChips(); renderSheet(); renderOps();
+  const c = $('chat'); c.scrollTop = c.scrollHeight; requestAnimationFrame(() => { c.scrollTop = c.scrollHeight; });
+}
+
+// ===== Hành động =====
+function pickBoth(key, label) {
+  const k = S.kb4;
+  say('kb4', 'user', label);
+  log('kb4', 'Khách', '', 'none', 'Chọn qua nút gợi ý: ' + label + ' (chưa xác nhận)');
+  k.flight = key; k.pax = { an: true, binh: true };
+  if (!k.hold || k.hold.flight !== key || holdLeft() <= 0) {
+    const r = toolHold(key);
+    say('kb4', 'ai', r.ok ? 'Mình đã chuyển chỗ giữ sang ' + FLIGHTS[key].code + ' (2 chỗ, 20 phút). Vé vẫn chưa đổi.' : 'Mình chưa giữ được chỗ: ' + r.reason + '. Vé chưa đổi.');
+  }
+  say('kb4', 'ai', 'Mình đã điền lựa chọn vào thẻ mới bên dưới. Bạn kiểm tra rồi bấm “Xác nhận đổi vé” — mình chưa đổi gì.');
+  newCard('kb4');
+}
+function act(a) {
+  const k4 = S.kb4, k3 = S.kb3;
+  switch (a) {
+    case 'confirm': {
+      if (!kb4Check().can) return;
+      log('kb4', 'Khách', '', 'none', 'Bấm "Xác nhận đổi vé": ' + FLIGHTS[k4.flight].code + ' · ' + names(k4.pax));
+      k4.busy = true; render();
+      setTimeout(() => {
+        k4.busy = false; k4.done = true; S.freeChangeUsed = true; k4.hold = null;
+        const f = FLIGHTS[k4.flight];
+        log('kb4', 'AI', 'doi_chuyen_bay', 'approve', 'THÀNH CÔNG · ' + f.code + ' ' + f.time + ' ' + f.date + ' · 2 hành khách · lượt miễn phí đã dùng');
+        push('kb4', { who: 'receipt', tool: 'doi_chuyen_bay', t: clock(), html: '✓ <b>Đã đổi vé</b> cho ' + PAX.an + ' và ' + PAX.binh + ' sang <b>' + f.code + ' lúc ' + f.time + ' ngày ' + f.date + '/2026</b>.<br>Lần đổi miễn phí: đã dùng. Trợ lý không có thao tác hoàn tác.<div class="actions"><span data-mark="2" style="display:inline-flex"><button class="btn" data-act="wrong">Báo đổi nhầm</button></span></div>' });
+        render();
+      }, 700);
+      return;
+    }
+    case 'reset':
+      k4.flight = null; k4.pax = { an: false, binh: false };
+      say('kb4', 'ai', 'Mình đã bỏ lựa chọn cũ; bạn chọn lại chuyến và người bay rồi kiểm tra trước khi xác nhận.');
+      break;
+    case 'chip201': pickBoth('BM201', 'BM 201 · cả hai'); break;
+    case 'chip205': pickBoth('BM205', 'BM 205 · cả hai'); break;
+    case 'rehold': {
+      log('kb4', 'AI', 'tra_cuu_dat_cho', 'auto', 'Tra lại chỗ trống sau khi hết hạn giữ');
+      const r = toolHold(k4.flight || 'BM201');
+      say('kb4', 'ai', r.ok ? 'Mình đã tra lại và giữ 2 chỗ ' + FLIGHTS[r.flight].code + ' thêm 20 phút. Vé vẫn chưa đổi.' : 'Mình chưa giữ được chỗ: ' + r.reason + '.');
+      newCard('kb4');
+      break;
+    }
+    case 'wrong':
+      say('kb4', 'ai', 'Mình xin lỗi. Mình không có thao tác hoàn tác lần đổi này và sẽ không tự đổi lần nữa. Mình đã chuyển nhân viên kèm thao tác đã làm để kiểm tra hướng xử lý.');
+      S.bans.redo++;
+      log('kb4', 'Hệ thống', 'doi_chuyen_bay', 'ban', 'Chặn gọi lần hai để chữa đổi nhầm');
+      k4.staff = true;
+      handoff('kb4', 'Khách báo đổi nhầm', ['Đã đổi: ' + FLIGHTS[k4.flight].code + ' ' + FLIGHTS[k4.flight].time + ' ' + FLIGHTS[k4.flight].date + ', 2 hành khách', 'Lượt đổi miễn phí: đã dùng', 'Xác nhận do khách bấm (xem nhật ký)', 'Cần nhân viên: kiểm tra hướng xử lý; trợ lý không đổi lại']);
+      break;
+    case 'staff4':
+      if (k4.staff) { say('kb4', 'ai', 'Bạn đã được chuyển nhân viên và đang chờ. Nhân viên đã có sẵn thông tin, bạn không phải kể lại.'); break; }
+      k4.staff = true;
+      say('kb4', 'ai', 'Mình đã chuyển nhân viên, kèm lựa chọn và trạng thái giữ chỗ hiện tại. Vé chưa đổi.');
+      handoff('kb4', 'Khách yêu cầu nhân viên', ['Lựa chọn hiện tại: ' + (k4.flight ? FLIGHTS[k4.flight].code : 'chưa chọn') + ' · ' + (names(k4.pax) || 'chưa chọn người'), 'Giữ chỗ: ' + (k4.hold && holdLeft() > 0 ? FLIGHTS[k4.hold.flight].code + ', còn ' + fmt(holdLeft()) : 'không'), 'Vé: CHƯA ĐỔI']);
+      break;
+    case 'staffChild':
+      if (k4.staff) return;
+      k4.staff = true; S.bans.child++;
+      log('kb4', 'Hệ thống', 'doi_chuyen_bay', 'ban', 'Chặn tách đoàn có trẻ 5 tuổi');
+      say('kb4', 'ai', 'Trường hợp bé Bình bay riêng cần nhân viên xử lý, mình không tự đổi vé. Nếu hai mẹ con đi cùng, BM 201 vẫn còn đủ chỗ.');
+      handoff('kb4', 'Trẻ 5 tuổi / tách đoàn', ['Khách chọn đổi riêng cho: ' + (names(k4.pax) || '—'), 'Bé Nguyễn Gia Bình, 5 tuổi', 'Chuyến còn chỗ: BM 217 (1), BM 201 (9), BM 205 (4)', 'Vé: CHƯA ĐỔI']);
+      break;
+    case 'fill':
+      k3.dataFilled = true;
+      S.queue.filter(x => x.reason === 'Thiếu dữ liệu hoàn vé').forEach(x => x.resolved = 'Đã bổ sung · chờ khách quyết');
+      log('kb3', 'Nhân viên', '', 'none', 'Bổ sung nơi nhận tiền + thời gian hoàn (dữ liệu giả cho demo). Không gửi hoàn.');
+      say('kb3', 'ai', 'Nhân viên đã bổ sung nơi nhận tiền và thời gian hoàn. Bạn chọn người được hoàn rồi kiểm tra lại trước khi bấm gửi. Mình vẫn chưa gửi gì.');
+      newCard('kb3');
+      S.tab = 'kb3';
+      break;
+    case 'chipBoth':
+      say('kb3', 'user', 'Hoàn cho cả hai');
+      log('kb3', 'Khách', '', 'none', 'Chọn qua nút gợi ý: hoàn cho cả hai (chưa xác nhận)');
+      k3.pax = { an: true, binh: true };
+      say('kb3', 'ai', 'Mình đã điền cả hai hành khách vào thẻ mới bên dưới. Mình chưa gửi gì' + (k3.dataFilled ? '; bạn kiểm tra rồi bấm xác nhận.' : '; nút gửi sẽ xuất hiện khi nhân viên bổ sung thông tin hoàn.'));
+      newCard('kb3');
+      break;
+    case 'reset3':
+      k3.pax = { an: false, binh: false }; k3.sheet = false;
+      say('kb3', 'ai', 'Mình đã bỏ lựa chọn cũ; bạn chọn lại người được hoàn.');
+      break;
+    case 'step1':
+      if (!(k3.pax.an || k3.pax.binh) || !k3.dataFilled) return;
+      log('kb3', 'Khách', '', 'none', 'Bấm "Xác nhận gửi yêu cầu hoàn" (bước 1/2) · ' + names(k3.pax));
+      k3.sheet = true;
+      break;
+    case 'sheetBack': k3.sheet = false; break;
+    case 'sheetSwitch':
+      k3.sheet = false;
+      log('kb3', 'Khách', '', 'none', 'Bước 2/2: chọn "Đổi chuyến thay vì hoàn" → không gửi');
+      act('toKb4'); return;
+    case 'send':
+      k3.sheet = false;
+      log('kb3', 'Khách', '', 'none', 'Bấm "Gửi yêu cầu hoàn" (bước 2/2) · ' + names(k3.pax));
+      k3.busy = true; render();
+      setTimeout(() => {
+        k3.busy = false; S.refundSent = true; k4.hold = null;
+        log('kb3', 'AI', 'gui_yeu_cau_hoan_ve', 'approve', 'THÀNH CÔNG · ' + names(k3.pax) + ' · khách xác nhận 2 bước');
+        push('kb3', { who: 'receipt', sent: true, tool: 'gui_yeu_cau_hoan_ve', t: clock(), html: '<b>Đã gửi yêu cầu hoàn</b> cho ' + names(k3.pax) + ' · BM 213.<br>Yêu cầu này <b>không huỷ được</b>. Nếu bạn đổi ý, trợ lý không lấy lại được vé; chỉ nhân viên kiểm tra được hướng xử lý.<div class="actions"><button class="btn" data-act="staff3">Nhờ nhân viên</button></div>' });
+        render();
+      }, 700);
+      return;
+    case 'toKb4':
+      S.tab = 'kb4';
+      say('kb4', 'ai', 'Mình chưa gửi yêu cầu hoàn. Bạn vẫn còn lượt đổi miễn phí: chọn chuyến và người bay ở thẻ bên dưới nhé.');
+      if (!S.kb4.done) newCard('kb4');
+      break;
+    case 'staff3':
+      if (k3.staff && !S.refundSent) { say('kb3', 'ai', 'Bạn đã được chuyển nhân viên và đang chờ. Nhân viên đã có sẵn thông tin, bạn không phải kể lại.'); break; }
+      say('kb3', 'ai', S.refundSent ? 'Yêu cầu hoàn đã gửi không huỷ được. Mình đã chuyển nhân viên để kiểm tra hướng xử lý; mình không hứa lấy lại được vé.' : 'Mình đã chuyển nhân viên.');
+      handoff('kb3', S.refundSent ? 'Khách đổi ý sau khi gửi hoàn' : 'Khách yêu cầu nhân viên', ['Yêu cầu hoàn: ' + (S.refundSent ? 'ĐÃ GỬI (' + names(k3.pax) + ')' : 'chưa gửi'), 'Trợ lý không huỷ được yêu cầu đã gửi']);
+      k3.staff = true;
+      break;
+    // Điều khiển demo
+    case 'expire':
+      if (k4.hold) { k4.hold.until = Date.now(); expireNow(); }
+      return;
+    case 'failNext':
+      S.failNext = true;
+      log('kb4', 'Hệ thống', '', 'none', '[demo] Lần giữ chỗ tới sẽ thất bại');
+      break;
+    case 'restart': start(); return;
+  }
+  render();
+}
+function expireNow() {
+  const k = S.kb4;
+  if (k.done || k.expired || !k.hold) return;
+  k.expired = true; k.hold = null;
+  log('kb4', 'Hệ thống', 'giu_cho_chuyen_moi', 'auto', 'Hết 20 phút · chỗ tự nhả');
+  say('kb4', 'sys', 'Hết 20 phút: chỗ giữ tự nhả. Vé chưa đổi, lượt đổi miễn phí còn nguyên.');
+  render();
+}
+
+// ===== Sự kiện =====
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act],[data-flight],[data-case],[data-page],[data-demo]');
+  if (!t || t.disabled) return;
+  if (t.dataset.case) { S.tab = t.dataset.case; render(); return; }
+  if (t.dataset.page) { S.page = t.dataset.page; render(); return; }
+  if (t.dataset.demo) { act(t.dataset.demo); return; }
+  if (t.dataset.flight) {
+    const k = S.kb4, key = t.dataset.flight;
+    if (k.done || k.flight === key) return;
+    k.flight = key;
+    log('kb4', 'Khách', '', 'none', 'Chọn chuyến ' + FLIGHTS[key].code + ' trên thẻ');
+    if (!k.hold || k.hold.flight !== key) {
+      const r = toolHold(key);
+      say('kb4', 'ai', r.ok ? 'Mình đã chuyển chỗ giữ sang ' + FLIGHTS[key].code + ' (2 chỗ, 20 phút). Vé vẫn chưa đổi.' : 'Mình chưa giữ được chỗ: ' + r.reason + '.');
+    }
+    render(); return;
+  }
+  act(t.dataset.act);
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.pax) { S.kb4.pax[t.dataset.pax] = t.checked; log('kb4', 'Khách', '', 'none', (t.checked ? 'Chọn ' : 'Bỏ ') + PAX[t.dataset.pax]); render(); }
+  if (t.dataset.rpax) { S.kb3.pax[t.dataset.rpax] = t.checked; S.kb3.sheet = false; render(); }
+});
+$('markToggle').addEventListener('change', e => document.body.classList.toggle('marks', e.target.checked));
+
+// ===== Chat: tin nhắn KHÔNG BAO GIỜ là xác nhận; ca lạ đi đường an toàn =====
+function norm(t) { return t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd'); }
+function reply(text) {
+  const t = norm(text);
+  if (/nhan vien hang|bo qua|bo buoc|admin/.test(t)) { S.bans.chat++; log(S.tab, 'Hệ thống', '', 'ban', 'Tin chat đòi bỏ bước xác nhận → từ chối'); return 'Mình không bỏ qua bước xác nhận theo tin nhắn trong chat. Đổi vé hay gửi hoàn chỉ thực hiện khi chủ đặt chỗ bấm xác nhận trên màn hình. Nếu cần ngoại lệ, mình có thể chuyển nhân viên qua luồng hỗ trợ.'; }
+  if (/boi thuong|den bu/.test(t)) { S.bans.promise++; return 'Chuyến BM 213 huỷ do thời tiết nên không có bồi thường tiền mặt. Quyền lợi của bạn: đổi miễn phí một lần trong 48 giờ hoặc hoàn toàn bộ. Nếu bạn cho rằng lý do huỷ khác, mình chuyển nhân viên kiểm tra.'; }
+  if (/doi ten/.test(t)) { S.bans.promise++; return 'Mình không đổi tên người bay được. Mình có thể chuyển nhân viên kiểm tra điều kiện, nhưng không hứa chắc là đổi được.'; }
+  if (/mot minh|bay truoc|di truoc|di rieng/.test(t)) { S.bans.child++; log(S.tab, 'Hệ thống', 'doi_chuyen_bay', 'ban', 'Yêu cầu cho trẻ bay riêng → không làm'); return 'Bé Bình 5 tuổi bay riêng cần nhân viên xử lý, mình không tự đổi vé cho trường hợp này. Bạn bấm “Nhờ nhân viên”, hoặc chọn chuyến cho cả hai mẹ con.'; }
+  if (/hoan|huy het/.test(t)) { S.tab = 'kb3'; return 'Mình chưa gửi yêu cầu hoàn. Bạn xem bản nháp: chọn người được hoàn; yêu cầu đã gửi thì không huỷ được.'; }
+  if (/dong y|xac nhan|^(ok|oke|u|uh|um|chot)\b/.test(t)) { log(S.tab, 'Khách', '', 'none', 'Nhắn "' + text + '" → không tính là xác nhận'); return 'Mình chưa thực hiện gì từ tin nhắn chat. Để đổi vé hoặc gửi hoàn, bạn kiểm tra thẻ rồi bấm nút xác nhận trên thẻ.'; }
+  if (/doi|chuyen|sang mai|21h|21:00|7h|9h/.test(t)) return 'Mình chưa đổi vé. Bạn chọn chuyến và người bay trên thẻ “Chờ xác nhận”; BM 217 21:00 chỉ còn 1 chỗ nên không đủ cho hai mẹ con.';
+  return 'Mình chưa chắc hiểu đúng ý bạn, nên mình chưa thay đổi gì trên vé. Bạn có thể chọn trên thẻ, nhắn rõ hơn, hoặc bấm “Nhờ nhân viên”.';
+}
+$('chatForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const v = $('chatInput').value.trim();
+  if (!v) return;
+  say(S.tab, 'user', v);
+  const r = reply(v);
+  say(S.tab, 'ai', r);
+  $('chatInput').value = '';
+  render();
+});
+
+// Đồng hồ giữ chỗ
+setInterval(() => {
+  const k = S.kb4;
+  if (k.hold && !k.done && holdLeft() <= 0) { expireNow(); return; }
+  document.querySelectorAll('.timer').forEach(el => el.textContent = fmt(holdLeft()));
+}, 1000);
+
+// ===== Khởi động. Trạng thái dựng sẵn cho ảnh chụp: ?case=kb4|kb3&preset=ready|split|done|final&page=log|tools&marks=1 =====
+function start() { S = fresh(); initKb4(); initKb3(); render(); }
+start();
+const q = new URLSearchParams(location.search);
+if (q.get('marks') === '1') { document.body.classList.add('marks'); $('markToggle').checked = true; }
+if (q.get('page') === 'tools') S.page = 'tools';
+const preset = q.get('preset');
+if (preset === 'ready' || preset === 'done') { S.kb4.flight = 'BM201'; S.kb4.pax = { an: true, binh: true }; log('kb4', 'Khách', '', 'none', 'Chọn BM 201 · ' + PAX.an + ', ' + PAX.binh); }
+if (preset === 'split') { S.kb4.flight = 'BM201'; S.kb4.pax = { an: false, binh: true }; log('kb4', 'Khách', '', 'none', 'Chọn BM 201 · chỉ ' + PAX.binh); }
+if (q.get('case') === 'kb3') S.tab = 'kb3';
+render();
+if (preset === 'done') act('confirm');
+if (preset === 'final') { S.tab = 'kb3'; act('fill'); S.kb3.pax = { an: true, binh: true }; act('step1'); }
+</script>
+</body>
+</html>

@@ -7,14 +7,14 @@
 
 Bài nộp cần **danh sách thành viên** và **mỗi người làm gì**. Nhóm tự chia việc, không bắt buộc theo vai trò cố định. Ví dụ một cách chia (không bắt buộc): dựng prototype, viết câu chữ AI, giữ bảng kịch bản và kịch bản demo.
 
-**Lớp:** ____ · **Bàn / zone:** ____ · **Track:** ____
+**Lớp:** L3A · **Bàn / zone:** ____ · **Track:** T3 Du lịch
 
 | Họ và Tên | Mã Học Viên | Việc đã làm |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+|Lê Hải Bắc  |2A202603710  |**Chặng 1** (cả nhóm thảo luận): lát cắt, ai chịu gì khi AI sai, tool không đảo được, 3 việc không làm. **Chặng 2** (cả nhóm): 11 kịch bản phủ 4 lớp, gắn nhãn mức hại. **Chốt 2 kịch bản đắt nhất KB3, KB4** và lý do. **Chặng 3**: cùng Vũ phân tích **KB4 "Ừ đổi đi"** — câu AI nói nguyên văn, người dùng thấy gì, bước tiếp theo, ai được báo; chọn hỏi lại, phương án đã loại; lỗi hệ thống / lỗi ngữ cảnh; bốn đường đi. **Chặng 4**: bảng mức tự chủ từng tool, tách `soan_yeu_cau_hoan` / `gui_yeu_cau_hoan_ve`, luật thêm; đề xuất bước xác nhận gửi hoàn lần cuối. **Chặng 5**: dựng `prototype/index.html`, 4 ảnh đánh số, viết §5. **Chặng 6** (cả nhóm): 3 tiêu chí Pass/Fail, chấm thử trên KB3–KB4, ghi lỗi còn lại. |
+|Đào Trường Vũ |2A202603721  |**Chặng 1** (cả nhóm thảo luận): lát cắt, ai chịu gì khi AI sai, tool không đảo được, 3 việc không làm. **Chặng 2** (cả nhóm): 11 kịch bản phủ 4 lớp, gắn nhãn mức hại. **Chặng 3**: cùng Bắc phân tích **KB4 "Ừ đổi đi"** — câu AI nói nguyên văn, người dùng thấy gì, bước tiếp theo, ai được báo; chọn hỏi lại, phương án đã loại; lỗi hệ thống / lỗi ngữ cảnh; bốn đường đi. **Chặng 4**: thử mức tự chủ trên KB4 và KB1 (ca bình thường); viết phần mức tự chủ đổi lời hứa với người dùng. **Chặng 6** (cả nhóm): 3 tiêu chí Pass/Fail, chấm thử trên KB3–KB4, ghi lỗi còn lại. |
+|Đỗ Nhật Anh  |2A202603701  |**Chặng 1** (cả nhóm thảo luận): lát cắt, ai chịu gì khi AI sai, tool không đảo được, 3 việc không làm. **Chặng 2** (cả nhóm): 11 kịch bản phủ 4 lớp, gắn nhãn mức hại. **Chặng 3**: cùng Bách phân tích sâu **KB3 "Thôi huỷ hết đi"** — câu AI nói nguyên văn, người dùng thấy gì, bước tiếp theo, ai được báo; chọn dừng gửi và chuyển nhân viên, phương án đã loại; loại lỗi; lỗi sửa câu chữ không cứu được. **Chặng 4**: phân tích tool khó xếp nhất `gui_yeu_cau_hoan_ve` (phiếu "cấm", cái giá của mỗi phía); bảng cấm theo ngữ cảnh. **Chặng 6** (cả nhóm): 3 tiêu chí Pass/Fail, chấm thử trên KB3–KB4, ghi lỗi còn lại. |
+|Nguyễn Trọng Phương Bách  |2A202603716  |**Chặng 1** (cả nhóm thảo luận): lát cắt, ai chịu gì khi AI sai, tool không đảo được, 3 việc không làm. **Chặng 2** (cả nhóm): 11 kịch bản phủ 4 lớp, gắn nhãn mức hại. **Chặng 3**: cùng Nhật Anh phân tích sâu **KB3 "Thôi huỷ hết đi"** — câu AI nói nguyên văn, người dùng thấy gì, bước tiếp theo, ai được báo; chọn dừng gửi và chuyển nhân viên, phương án đã loại; loại lỗi; lỗi sửa câu chữ không cứu được. **Chặng 4**: bảng ai duyệt / thấy gì / quá hạn cho `doi_chuyen_bay` và `gui_yeu_cau_hoan_ve`; thử mức trên KB3. **Chặng 6** (cả nhóm): 3 tiêu chí Pass/Fail, chấm thử trên KB3–KB4, ghi lỗi còn lại. |
 
 > Copy bảng này lên đầu `spec.md` và điền. Ghi cụ thể việc mỗi người làm — khi demo, ai cũng có thể bị hỏi về phần có tên mình.
 

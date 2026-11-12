@@ -1,5 +1,10 @@
 # Bài nộp LAB5 — [Track-03] · Nhóm [XanhSM]
-[Danh sách thành viên và việc mỗi người làm — copy bảng từ README]
+| Họ và Tên | Mã Học Viên | Việc đã làm |
+|---|---|---|
+|Lê Hải Bắc  |2A202603710  |**Chặng 1** (cả nhóm thảo luận): lát cắt, ai chịu gì khi AI sai, tool không đảo được, 3 việc không làm. **Chặng 2** (cả nhóm): 11 kịch bản phủ 4 lớp, gắn nhãn mức hại. **Chốt 2 kịch bản đắt nhất KB3, KB4** và lý do. **Chặng 3**: cùng Vũ phân tích **KB4 "Ừ đổi đi"** — câu AI nói nguyên văn, người dùng thấy gì, bước tiếp theo, ai được báo; chọn hỏi lại, phương án đã loại; lỗi hệ thống / lỗi ngữ cảnh; bốn đường đi. **Chặng 4**: bảng mức tự chủ từng tool, tách `soan_yeu_cau_hoan` / `gui_yeu_cau_hoan_ve`, luật thêm; đề xuất bước xác nhận gửi hoàn lần cuối. **Chặng 5**: dựng `prototype/index.html`, 4 ảnh đánh số, viết §5. **Chặng 6** (cả nhóm): 3 tiêu chí Pass/Fail, chấm thử trên KB3–KB4, ghi lỗi còn lại. |
+|Đào Trường Vũ |2A202603721  |**Chặng 1** (cả nhóm thảo luận): lát cắt, ai chịu gì khi AI sai, tool không đảo được, 3 việc không làm. **Chặng 2** (cả nhóm): 11 kịch bản phủ 4 lớp, gắn nhãn mức hại. **Chặng 3**: cùng Bắc phân tích **KB4 "Ừ đổi đi"** — câu AI nói nguyên văn, người dùng thấy gì, bước tiếp theo, ai được báo; chọn hỏi lại, phương án đã loại; lỗi hệ thống / lỗi ngữ cảnh; bốn đường đi. **Chặng 4**: thử mức tự chủ trên KB4 và KB1 (ca bình thường); viết phần mức tự chủ đổi lời hứa với người dùng. **Chặng 6** (cả nhóm): 3 tiêu chí Pass/Fail, chấm thử trên KB3–KB4, ghi lỗi còn lại. |
+|Đỗ Nhật Anh  |2A202603701  |**Chặng 1** (cả nhóm thảo luận): lát cắt, ai chịu gì khi AI sai, tool không đảo được, 3 việc không làm. **Chặng 2** (cả nhóm): 11 kịch bản phủ 4 lớp, gắn nhãn mức hại. **Chặng 3**: cùng Bách phân tích sâu **KB3 "Thôi huỷ hết đi"** — câu AI nói nguyên văn, người dùng thấy gì, bước tiếp theo, ai được báo; chọn dừng gửi và chuyển nhân viên, phương án đã loại; loại lỗi; lỗi sửa câu chữ không cứu được. **Chặng 4**: phân tích tool khó xếp nhất `gui_yeu_cau_hoan_ve` (phiếu "cấm", cái giá của mỗi phía); bảng cấm theo ngữ cảnh. **Chặng 6** (cả nhóm): 3 tiêu chí Pass/Fail, chấm thử trên KB3–KB4, ghi lỗi còn lại. |
+|Nguyễn Trọng Phương Bách  |2A202603716  |**Chặng 1** (cả nhóm thảo luận): lát cắt, ai chịu gì khi AI sai, tool không đảo được, 3 việc không làm. **Chặng 2** (cả nhóm): 11 kịch bản phủ 4 lớp, gắn nhãn mức hại. **Chặng 3**: cùng Nhật Anh phân tích sâu **KB3 "Thôi huỷ hết đi"** — câu AI nói nguyên văn, người dùng thấy gì, bước tiếp theo, ai được báo; chọn dừng gửi và chuyển nhân viên, phương án đã loại; loại lỗi; lỗi sửa câu chữ không cứu được. **Chặng 4**: bảng ai duyệt / thấy gì / quá hạn cho `doi_chuyen_bay` và `gui_yeu_cau_hoan_ve`; thử mức trên KB3. **Chặng 6** (cả nhóm): 3 tiêu chí Pass/Fail, chấm thử trên KB3–KB4, ghi lỗi còn lại. |
 
 ## §1. Lát cắt & phạm vi
 
@@ -255,8 +260,89 @@ Với `doi_chuyen_bay` và `gui_yeu_cau_hoan_ve` ở mức **cần khách duyệ
 - 1–2 ảnh có đánh số; mỗi số: thể hiện gì · nguyên tắc HAX/PAIR nào · mức tự chủ nào.
 - Quyết định: cách hiện độ chắc/bằng chứng và điều khiển mức tự chủ — đã nghĩ tới cách nào khác, vì sao chọn cách này.
 
+---
+
+**Link hoặc file:** [`prototype/index.html`](prototype/index.html) — mở trực tiếp bằng trình duyệt, không cần cài gì. **Công cụ:** HTML + JavaScript thuần (dựng với coding agent Claude). **Mock:** toàn bộ — dữ liệu dựng TRV-7Q2K, tool là hàm giả lập, không đăng nhập, không backend. **Lời gọi AI thật:** không; câu trả lời của trợ lý là câu nguyên văn ở §3, ô chat chỉ định tuyến theo từ khoá. Nơi nhận tiền và "7–14 ngày làm việc" ở ca KB3 là **dữ liệu giả cho demo** (fixture không có), được gắn nhãn ngay trên màn hình.
+
+**Hai màn hình, nối với nhau:**
+- **Trái — điện thoại của khách** (ứng dụng Bay Mẫu): chat với trợ lý; thẻ chọn chuyến, thẻ xác nhận, thẻ kết quả đều nằm **trong luồng chat**.
+- **Phải — màn hình nội bộ của nhân viên / quản lý** (khách không thấy), hai trang: **Nhật ký & quyết định** (tình trạng đặt chỗ, hàng chờ chuyển nhân viên, nhật ký từng tool + ai bấm xác nhận lúc nào) và **Tool & mức tự chủ** (6 tool, mức, luật, số lần đã gọi; bảng cấm theo ngữ cảnh và số lần đã chặn).
+- Thanh **Điều khiển demo** ở trên cùng không thuộc sản phẩm: chuyển giữa **Ca 1 · "Ừ đổi đi" (★ KB4)** và **Ca 2 · "Thôi huỷ hết đi" (★ KB3)**, tua hết 20 phút giữ chỗ, giả lập giữ chỗ thất bại, làm lại từ đầu, bật số đánh dấu.
+
+**Bấm qua ca khó (kịch bản demo ~4 phút):**
+1. **Ca 1:** thanh trạng thái ghim "Đã giữ 2 chỗ BM 201 · còn 19:58 · CHƯA đổi vé"; thẻ **Chờ xác nhận [1]** — BM 217 khoá vì chỉ còn 1 chỗ, hành khách không chọn sẵn. Bên phải: nhật ký ghi tin "Ừ đổi đi" là **không tính là xác nhận**.
+2. Gõ "ok" vào chat → trợ lý trả lời "Mình chưa thực hiện gì từ tin nhắn chat".
+3. Chỉ tick bé Bình → khung đỏ **[6]**, nút xác nhận khoá → "Chuyển nhân viên" → bên phải hàng chờ **[7]** có thêm một mục kèm tóm tắt.
+4. Bấm nút gợi ý "BM 205 · cả hai" → chỗ giữ chuyển sang BM 205, **thẻ cũ chuyển xám "Đã hết hiệu lực"**, thẻ mới đã điền sẵn → bấm **Xác nhận đổi vé** → **thẻ kết quả hệ thống [8]** "Đã đổi vé…", lượt miễn phí chuyển "đã dùng"; nhật ký ghi khách bấm lúc nào rồi mới tới `doi_chuyen_bay`. Sau đó chỉ còn **Báo đổi nhầm [2]** (không có nút hoàn tác).
+5. (Tuỳ chọn) "⏩ Tua hết 20 phút" → chỗ tự nhả, thẻ hiện "Tra & giữ lại chỗ"; "✖ Lần giữ chỗ tới sẽ thất bại" → trợ lý nói "chưa giữ được chỗ", thanh trạng thái không ghi "đã giữ".
+6. **Ca 2:** bản nháp **CHƯA GỬI**, hai dòng "chưa có dữ liệu", **không có nút gửi**, chat hiện "Đã chuyển nhân viên · đang chờ" kèm những gì nhân viên đã có. Sang màn hình nội bộ, nhân viên bấm **Bổ sung nơi nhận tiền + thời gian hoàn** (không gửi thay khách) → điện thoại cập nhật, nút gửi xuất hiện nhưng khoá tới khi chọn người → bấm → **bảng trượt xác nhận lần cuối [5]** với hai nút ngang hàng.
+
+**Ảnh đánh số** (bật "Hiện số đánh dấu" để chụp lại; hoặc mở `index.html?case=kb4&preset=ready&marks=1`, các preset: `ready`, `done`, `split`, `final`, thêm `&page=tools`):
+
+| Ảnh | Trạng thái |
+|---|---|
+| [`anh-1-kb4-cho-xac-nhan.png`](prototype/anh-1-kb4-cho-xac-nhan.png) | Ca 1, đã chọn BM 201 + hai người, nút xác nhận đã bật; bên phải nhật ký + hàng chờ |
+| [`anh-2-kb4-da-doi-ve.png`](prototype/anh-2-kb4-da-doi-ve.png) | Ca 1, sau khi đổi: thẻ kết quả, thẻ cũ "Đã dùng", nút Báo đổi nhầm; nhật ký có dòng khách bấm → tool thành công |
+| [`anh-3-kb4-tach-doan.png`](prototype/anh-3-kb4-tach-doan.png) | Ca 1, chỉ chọn bé Bình: bị chặn; bên phải trang Tool & mức tự chủ |
+| [`anh-4-kb3-chua-du-du-lieu.png`](prototype/anh-4-kb3-chua-du-du-lieu.png) | Ca 2, thiếu dữ liệu hoàn: không có nút gửi, đã chuyển nhân viên; nhân viên thấy hàng chờ |
+| [`anh-5-kb3-xac-nhan-cuoi.png`](prototype/anh-5-kb3-xac-nhan-cuoi.png) | Ca 2, bảng trượt xác nhận lần cuối; hàng chờ "Đã bổ sung · chờ khách quyết" |
+
+| Số | Ở đâu · thể hiện gì | Nguyên tắc HAX/PAIR | Mức tự chủ |
+|---|---|---|---|
+| **[1]** | Điện thoại · thẻ **"Chờ xác nhận · đổi chuyến"** (Ca 1) / **"Bản nháp yêu cầu hoàn"** (Ca 2) trong chat: chuyến có giờ + số chỗ, BM 217 khoá, hành khách không chọn sẵn, tóm tắt cũ → mới, nút xác nhận chỉ bật khi đủ điều kiện và ghi rõ còn thiếu gì | **G10** thu hẹp phạm vi khi nghi ngờ | `doi_chuyen_bay`, `gui_yeu_cau_hoan_ve` **khách xác nhận** |
+| **[2]** | Điện thoại · **Sửa lựa chọn** (trước giao dịch) và **Báo đổi nhầm** (sau giao dịch, thay cho nút hoàn tác giả) | **G9** sửa dễ dàng | Báo đổi nhầm → `chuyen_nhan_vien` **AI tự làm**; gọi đổi vé lần hai bị **cấm** |
+| **[3]** | Điện thoại · thẻ đặt chỗ ghim: **ĐÃ HUỶ do bão**, quyền lợi, lượt đổi "còn lượt / đã dùng", nguồn `tra_cuu_dat_cho` + thời điểm tra; Ca 2 có hai dòng **"chưa có dữ liệu"** | **PAIR Explainability + Trust** (+ G2) | `tra_cuu_dat_cho` **AI tự làm** |
+| **[4]** | Điện thoại · đầu màn hình: "Bạn đang trò chuyện với **trợ lý AI**" + ba nhãn **Tự làm / Bạn xác nhận / Không làm** | **G1** làm rõ hệ thống làm được gì (và yêu cầu minh bạch của Luật AI 134/2025/QH15, Điều 11) | Cả ba mức, nói với khách bằng lời thường |
+| **[5]** | Điện thoại · **bảng trượt xác nhận lần cuối** gửi hoàn: câu hậu quả cụ thể, nút **Gửi yêu cầu hoàn** và **Đổi chuyến thay vì hoàn** cùng cỡ | **G11** giải thích vì sao + **G9** (đường đổi ý trước khi không còn đảo được) | `gui_yeu_cau_hoan_ve` **khách xác nhận 2 bước**, chỉ mở khi đủ dữ liệu |
+| **[6]** | Điện thoại · chỉ chọn bé Bình → khung đỏ, nút xác nhận khoá, nút **Chuyển nhân viên** | **PAIR Errors + Graceful failure** (mỗi lỗi một đường lui) | **Cấm theo ngữ cảnh** → `chuyen_nhan_vien` |
+| **[7]** | Màn hình nội bộ · **hàng chờ chuyển nhân viên**: lý do, tin gốc, dữ liệu còn thiếu, trạng thái chưa gửi / đã đổi; nút nhân viên **chỉ bổ sung dữ liệu, không gửi thay khách**. Bên khách có thẻ "Đã chuyển nhân viên · nhân viên đã có sẵn…" và **không hứa thời gian chờ** | **PAIR Errors + Graceful failure** (đường sang người thật, khách không phải kể lại) | `chuyen_nhan_vien` **AI tự làm**; nhân viên không phải người duyệt hoàn |
+| **[8]** | Điện thoại · **thẻ "Kết quả hệ thống"** (viền xanh / đỏ, ghi tên tool + giờ), tách khỏi bong bóng lời AI; chỉ sinh ra khi tool trả về thành công | **PAIR Explainability + Trust** (khách phân biệt *đề xuất* với *việc đã làm*) | Kết quả của bước **khách xác nhận** |
+| **[9]** | Màn hình nội bộ · trang **Tool & mức tự chủ**: 6 tool, mức, luật, lý do theo cái giá khi sai, số lần đã gọi; bảng cấm theo ngữ cảnh + số lần đã chặn. Chỉ xem, không có nút đổi mức | **G1** cho người vận hành (biết trợ lý được làm gì) | Đúng mức nhóm chốt ở §4 |
+
+**Ca lạ thì prototype đi đường nào:** tin nhắn chat **không bao giờ** thay đổi vé. Tin xác nhận mơ hồ ("ok", "đồng ý") → nhắc bấm nút trên thẻ, nhật ký ghi "không tính là xác nhận"; tin tự xưng nhân viên hãng → từ chối bỏ bước xác nhận, đếm vào "đã chặn" (KB10); hỏi bồi thường → nêu đúng chính sách (KB6); đổi tên → chuyển nhân viên (KB8); tin không hiểu → "Mình chưa chắc hiểu đúng ý bạn, nên mình chưa thay đổi gì trên vé", nút gợi ý **Nhờ nhân viên** luôn có.
+
+**Quyết định cách hiện:**
+
+| Đã cân nhắc | Chọn / loại | Vì sao |
+|---|---|---|
+| Một trang web, thẻ hành động tách sang cột phải (bản đầu) | Loại | Không giống thứ khách thật dùng; khách phải nhìn hai chỗ. Xác nhận nằm ngoài chat dễ bị hiểu là một luồng khác. |
+| **Điện thoại, thẻ nằm trong chat** | **Chọn** | Đúng ngữ cảnh khách vừa nhận tin huỷ trên điện thoại. Chat để hỏi và giải thích; thao tác có hậu quả chỉ nằm trên thẻ có nút riêng — tách "nói" khỏi "làm". |
+| Thẻ cũ trong chat vẫn bấm được | Loại | Trên điện thoại khách hay cuộn lên bấm lại; xác nhận cũ phải mất hiệu lực khi đổi lựa chọn hoặc hết giữ chỗ (luật §3–§4). Thẻ cũ chuyển xám "Đã hết hiệu lực". |
+| Nút gợi ý là nút xác nhận ("Đổi BM 201 luôn") | Loại | Một chạm là mất lượt đổi. Nút gợi ý chỉ điền lựa chọn vào thẻ, có dòng ghi rõ "không xác nhận thay bạn". |
+| Hiện độ chắc bằng phần trăm | Loại | Fixture không có điểm tin cậy; con số sẽ là bịa. Thay bằng nguồn + thời điểm tra + "chưa có dữ liệu" [3]. |
+| Nút "Hoàn tác" sau khi đổi | Loại | Không có tool hoàn tác. Thay bằng **Báo đổi nhầm** → nhân viên [2]. |
+| Hộp "Bạn chắc chứ? Có / Không" cho hoàn vé | Loại | Bấm theo phản xạ. Thay bằng câu hậu quả cụ thể + nút đổi chuyến ngang hàng, dạng bảng trượt quen trên điện thoại [5]. |
+| Nút chuyển mức tự chủ trên màn hình (như mẫu) | Loại | Mức là quyết định nhóm đã chốt ở §4; trang [9] chỉ xem. |
+| Không có màn hình nhân viên | Loại | Câu hỏi §3 "ai được báo, người đó thấy gì" chỉ trả lời bằng chữ. Màn hình nội bộ [7] cho thấy nhân viên nhận gì, và nhân viên **không** có nút gửi hoàn thay khách — *cách hiện nhóm tự nghĩ ra, không có trong mẫu.* |
+
 ## §6. Tốt là gì  (chặng 6 — nhẹ, bỏ được nếu thiếu giờ)
 - 3 tiêu chí Pass/Fail chấm được; thiết kế của nhóm đạt tiêu chí nào trên 2 kịch bản đắt nhất; lỗi còn lại.
+
+---
+
+> Chấm trên thiết kế §3–§4 và prototype §5, không làm thêm. "Pass" = đã bấm thử trên `prototype/index.html`; chưa kiểm được với một AI thật.
+
+**Ba tiêu chí Pass/Fail** (người ngoài nhóm chấm được bằng cách bấm prototype và đọc nhật ký tool ở màn hình nội bộ [7] và thẻ kết quả [8]):
+
+| # | Tiêu chí | Pass khi | Fail khi |
+|---|---|---|---|
+| T1 | **Không đổi vé / gửi hoàn khi chưa có xác nhận trên giao diện gắn với đúng chuyến và đúng người** | `doi_chuyen_bay` và `gui_yeu_cau_hoan_ve` chỉ xuất hiện trong nhật ký sau khi khách bấm nút xác nhận; tin chat ("ok", "ừ đổi đi", tin tự xưng nhân viên) không gọi tool nào có tác động | Có một lần gọi hai tool này mà trước đó không có lần bấm nút tương ứng, hoặc xác nhận không ghi rõ chuyến + người |
+| T2 | **Không nói điều dữ liệu hoặc tool chưa xác nhận** | Mọi câu "đã giữ / đã đổi / đã gửi" chỉ xuất hiện sau khi tool trả về thành công; dữ liệu không có thì nói "chưa có dữ liệu"; không hứa bồi thường, hoàn tác, thời gian chờ nhân viên | Có câu báo kết quả mà nhật ký không có tool thành công tương ứng, hoặc có con số / lời hứa không có trong fixture |
+| T3 | **Sau thao tác không đảo được hoặc việc ngoài thẩm quyền, luôn có đường tới nhân viên — không có hoàn tác giả, không tự gọi tool lần hai** | Sau đổi vé, sau gửi hoàn, khi tách đoàn có trẻ em: có nút tới nhân viên; không có nút "Hoàn tác"; không gọi lại `doi_chuyen_bay` để chữa | Có nút hoàn tác, hoặc AI tự đổi lần nữa, hoặc khách bị kẹt không có đường lui |
+
+**Chấm thử trên 2 kịch bản đắt nhất:**
+
+| | T1 | T2 | T3 |
+|---|---|---|---|
+| **★ KB3** "Thôi huỷ hết đi" | **Pass** — chưa có nút gửi khi thiếu dữ liệu; có nút thì phải chọn người + qua bảng trượt xác nhận lần cuối [5]; nhân viên chỉ bổ sung dữ liệu, không gửi thay [7] | **Pass** — hai dòng "chưa có dữ liệu"; "Đã gửi" chỉ hiện trong thẻ kết quả [8] sau khi tool thành công; không hứa thời gian phản hồi | **Pass** — đã chuyển nhân viên từ đầu; sau khi gửi chỉ có "Nhờ nhân viên", không có nút lấy lại vé |
+| **★ KB4** "Ừ đổi đi" | **Pass** — nút xác nhận chỉ bật khi đủ chuyến + hai người + giữ chỗ còn hiệu lực; "ok" trong chat không làm gì | **Pass** — "Đã giữ…" chỉ hiện khi giữ chỗ thành công (đã thử giả lập thất bại); hết 20 phút thì báo đã nhả, thẻ cũ hết hiệu lực | **Pass** — sau khi đổi chỉ có "Báo đổi nhầm" [2] → hàng chờ nhân viên [7]; chọn riêng bé Bình bị chặn [6] |
+
+**Lỗi còn lại (chưa sửa được):**
+1. **Chưa có AI thật.** Câu chữ là câu viết sẵn; một model thật vẫn có thể viết câu hứa sai ở chỗ khác. T2 mới Pass trên prototype, chưa Pass trên model.
+2. **KB4: AI tự giữ BM 201 trước khi khách chọn** — đúng mức nhóm chấp nhận ở §4, nhưng khách có thể tưởng "đã giữ" là "đã xong". Đang dựa vào nhãn "CHƯA đổi vé" để chặn hiểu nhầm.
+3. **KB3: khách phải chờ nhân viên mà không biết bao lâu** — fixture không có thời gian chờ nên prototype không hứa; trải nghiệm lúc chờ chưa được thiết kế.
+4. **Ô chat định tuyến theo từ khoá** — ca lạ ngoài danh sách chỉ rơi vào câu an toàn chung ("chưa thay đổi gì trên vé"), chưa hiểu được ý.
+5. **Nơi nhận tiền và thời gian hoàn trong prototype là dữ liệu giả**, chỉ để bấm qua được luồng; sản phẩm thật phải lấy từ hồ sơ hoặc nhân viên.
 
 ## §7. Demo
 - Ca lạ nhận được ở demo: prototype đã làm gì, và nhóm có đổi ý gì sau ca đó không.
