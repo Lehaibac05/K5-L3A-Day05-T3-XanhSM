@@ -14,6 +14,7 @@ Bài nộp cần **danh sách thành viên** và **mỗi người làm gì**. Nh
 |  |  |  |
 |  |  |  |
 |  |  |  |
+|  |  |  |
 
 > Copy bảng này lên đầu `spec.md` và điền. Ghi cụ thể việc mỗi người làm — khi demo, ai cũng có thể bị hỏi về phần có tên mình.
 
